@@ -59,6 +59,16 @@ class FakeCache:
         self._store[city] = reading
 
 
+class FakeNotifier:
+    """Test double standing in for a real notification adapter."""
+
+    def __init__(self):
+        self.notified_readings = []
+
+    def notify(self, reading):
+        self.notified_readings.append(reading)
+
+
 def make_reading(city="Timisoara") -> WeatherReading:
     return WeatherReading(
         city=city,
@@ -126,3 +136,34 @@ class TestCaching:
 
         assert provider.requested_city == "Timisoara"
         assert cache.get("Timisoara") is not None
+
+
+class TestNotifications:
+    def test_successful_fetch_triggers_a_notification(self):
+        provider = FakeProvider(reading=make_reading())
+        repository = FakeRepository()
+        notifier = FakeNotifier()
+        service = WeatherService(provider, repository, notifier=notifier)
+
+        result = service.fetch_and_store("Timisoara")
+
+        assert len(notifier.notified_readings) == 1
+        assert notifier.notified_readings[0].city == "Timisoara"
+
+    def test_no_notification_sent_when_no_notifier_configured(self):
+        provider = FakeProvider(reading=make_reading())
+        repository = FakeRepository()
+        service = WeatherService(provider, repository)
+
+        service.fetch_and_store("Timisoara")
+
+    def test_failed_fetch_does_not_trigger_a_notification(self):
+        provider = FakeProvider(error=CityNotFoundError("Atlantis"))
+        repository = FakeRepository()
+        notifier = FakeNotifier()
+        service = WeatherService(provider, repository, notifier=notifier)
+
+        with pytest.raises(CityNotFoundError):
+            service.fetch_and_store("Atlantis")
+
+        assert notifier.notified_readings == []

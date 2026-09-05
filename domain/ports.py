@@ -57,3 +57,12 @@ class WeatherCachePort(ABC):
     def set(self, city: str, reading: WeatherReading) -> None:
         """Cache a reading for city."""
         raise NotImplementedError
+
+
+class NotifierPort(ABC):
+    """Outbound port: notify something when a new reading is fetched."""
+
+    @abstractmethod
+    def notify(self, reading: WeatherReading) -> None:
+        """React to a newly fetched reading (e.g. log it, send an alert)."""
+        raise NotImplementedError

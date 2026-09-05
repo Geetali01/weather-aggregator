@@ -33,6 +33,9 @@ class WeatherService:
         if self._cache is not None:
             self._cache.set(city, saved)
 
+        if self._notifier is not None:
+            self._notifier.notify(saved)
+
         return saved
 
     def get_history(self, city: str) -> list[WeatherReading]:
