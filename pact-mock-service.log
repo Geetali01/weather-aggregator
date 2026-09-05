@@ -1,6 +1,6 @@
-I, [2026-09-05T17:33:45.323687 #10820]  INFO -- : Cleared interactions
-I, [2026-09-05T17:33:45.350145 #10820]  INFO -- : Registered expected interaction GET /v1/forecast?latitude=45.75&longitude=21.23&current_weather=true&wind_speed_unit=kmh
-D, [2026-09-05T17:33:45.350556 #10820] DEBUG -- : {
+I, [2026-09-05T17:38:22.004048 #17788]  INFO -- : Cleared interactions
+I, [2026-09-05T17:38:22.057707 #17788]  INFO -- : Registered expected interaction GET /v1/forecast?latitude=45.75&longitude=21.23&current_weather=true&wind_speed_unit=kmh
+D, [2026-09-05T17:38:22.059168 #17788] DEBUG -- : {
   "description": "a request for current weather at those coordinates",
   "providerState": "coordinates 45.75,21.23 have current weather data",
   "request": {
@@ -36,8 +36,8 @@ D, [2026-09-05T17:33:45.350556 #10820] DEBUG -- : {
   },
   "metadata": null
 }
-I, [2026-09-05T17:33:45.351073 #10820]  INFO -- : Registered expected interaction GET /v1/search?name=Timisoara&count=1&language=en&format=json
-D, [2026-09-05T17:33:45.351329 #10820] DEBUG -- : {
+I, [2026-09-05T17:38:22.059381 #17788]  INFO -- : Registered expected interaction GET /v1/search?name=Timisoara&count=1&language=en&format=json
+D, [2026-09-05T17:38:22.059509 #17788] DEBUG -- : {
   "description": "a request to geocode Timisoara",
   "providerState": "a city named Timisoara exists",
   "request": {
@@ -75,8 +75,8 @@ D, [2026-09-05T17:33:45.351329 #10820] DEBUG -- : {
   },
   "metadata": null
 }
-I, [2026-09-05T17:33:45.365462 #10820]  INFO -- : Received request GET /v1/search?name=Timisoara&count=1&language=en&format=json
-D, [2026-09-05T17:33:45.365792 #10820] DEBUG -- : {
+I, [2026-09-05T17:38:22.069210 #17788]  INFO -- : Received request GET /v1/search?name=Timisoara&count=1&language=en&format=json
+D, [2026-09-05T17:38:22.069387 #17788] DEBUG -- : {
   "path": "/v1/search",
   "query": "name=Timisoara&count=1&language=en&format=json",
   "method": "get",
@@ -89,8 +89,8 @@ D, [2026-09-05T17:33:45.365792 #10820] DEBUG -- : {
     "Version": "HTTP/1.1"
   }
 }
-I, [2026-09-05T17:33:45.366505 #10820]  INFO -- : Found matching response for GET /v1/search?name=Timisoara&count=1&language=en&format=json
-D, [2026-09-05T17:33:45.366770 #10820] DEBUG -- : {
+I, [2026-09-05T17:38:22.069949 #17788]  INFO -- : Found matching response for GET /v1/search?name=Timisoara&count=1&language=en&format=json
+D, [2026-09-05T17:38:22.070082 #17788] DEBUG -- : {
   "status": 200,
   "headers": {
   },
@@ -105,8 +105,8 @@ D, [2026-09-05T17:33:45.366770 #10820] DEBUG -- : {
     ]
   }
 }
-I, [2026-09-05T17:33:45.379032 #10820]  INFO -- : Received request GET /v1/forecast?latitude=45.75&longitude=21.23&current_weather=true&wind_speed_unit=kmh
-D, [2026-09-05T17:33:45.379987 #10820] DEBUG -- : {
+I, [2026-09-05T17:38:22.082914 #17788]  INFO -- : Received request GET /v1/forecast?latitude=45.75&longitude=21.23&current_weather=true&wind_speed_unit=kmh
+D, [2026-09-05T17:38:22.083078 #17788] DEBUG -- : {
   "path": "/v1/forecast",
   "query": "latitude=45.75&longitude=21.23&current_weather=true&wind_speed_unit=kmh",
   "method": "get",
@@ -119,8 +119,8 @@ D, [2026-09-05T17:33:45.379987 #10820] DEBUG -- : {
     "Version": "HTTP/1.1"
   }
 }
-I, [2026-09-05T17:33:45.380465 #10820]  INFO -- : Found matching response for GET /v1/forecast?latitude=45.75&longitude=21.23&current_weather=true&wind_speed_unit=kmh
-D, [2026-09-05T17:33:45.380802 #10820] DEBUG -- : {
+I, [2026-09-05T17:38:22.083535 #17788]  INFO -- : Found matching response for GET /v1/forecast?latitude=45.75&longitude=21.23&current_weather=true&wind_speed_unit=kmh
+D, [2026-09-05T17:38:22.083680 #17788] DEBUG -- : {
   "status": 200,
   "headers": {
   },
@@ -133,5 +133,5 @@ D, [2026-09-05T17:33:45.380802 #10820] DEBUG -- : {
     }
   }
 }
-I, [2026-09-05T17:33:45.396459 #10820]  INFO -- : Verifying - interactions matched
-I, [2026-09-05T17:33:45.415039 #10820]  INFO -- : Writing pact for OpenMeteoAPI to C:/Users/admin/Desktop/weather-aggregator/tests/contract/pacts/weatheraggregatorservice-openmeteoapi.json
+I, [2026-09-05T17:38:22.142022 #17788]  INFO -- : Verifying - interactions matched
+I, [2026-09-05T17:38:22.156774 #17788]  INFO -- : Writing pact for OpenMeteoAPI to C:/Users/admin/Desktop/weather-aggregator/tests/contract/pacts/weatheraggregatorservice-openmeteoapi.json
