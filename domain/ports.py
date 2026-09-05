@@ -43,3 +43,17 @@ class WeatherRepositoryPort(ABC):
     def find_latest_by_city(self, city: str) -> WeatherReading | None:
         """Return the single most recent reading for a city, or None."""
         raise NotImplementedError
+
+
+class WeatherCachePort(ABC):
+    """Outbound port: a fast, ephemeral store checked before hitting the real provider."""
+
+    @abstractmethod
+    def get(self, city: str) -> WeatherReading | None:
+        """Return a cached reading for city, or None if not cached / expired."""
+        raise NotImplementedError
+
+    @abstractmethod
+    def set(self, city: str, reading: WeatherReading) -> None:
+        """Cache a reading for city."""
+        raise NotImplementedError

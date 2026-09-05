@@ -20,6 +20,7 @@ class FakeProvider(WeatherProviderPort):
         self.requested_city = city
         if self._error:
             raise self._error
+        assert self._reading is not None
         return self._reading
 
 
@@ -43,6 +44,19 @@ class FakeRepository(WeatherRepositoryPort):
     def find_latest_by_city(self, city: str):
         matches = self.find_by_city(city)
         return matches[0] if matches else None
+
+
+class FakeCache:
+    """Test double standing in for a real cache adapter."""
+
+    def __init__(self):
+        self._store = {}
+
+    def get(self, city):
+        return self._store.get(city)
+
+    def set(self, city, reading):
+        self._store[city] = reading
 
 
 def make_reading(city="Timisoara") -> WeatherReading:
@@ -87,3 +101,28 @@ def test_city_not_found_propagates_and_stores_nothing():
         service.fetch_and_store("Atlantis")
 
     assert repository.find_by_city("Atlantis") == []
+
+
+class TestCaching:
+    def test_cache_hit_skips_the_provider_and_returns_cached_reading(self):
+        provider = FakeProvider(reading=make_reading())
+        repository = FakeRepository()
+        cache = FakeCache()
+        cache.set("Timisoara", make_reading())
+        service = WeatherService(provider, repository, cache=cache)
+
+        result = service.fetch_and_store("Timisoara")
+
+        assert provider.requested_city is None
+        assert result.city == "Timisoara"
+
+    def test_cache_miss_calls_the_provider_and_populates_the_cache(self):
+        provider = FakeProvider(reading=make_reading())
+        repository = FakeRepository()
+        cache = FakeCache()
+        service = WeatherService(provider, repository, cache=cache)
+
+        service.fetch_and_store("Timisoara")
+
+        assert provider.requested_city == "Timisoara"
+        assert cache.get("Timisoara") is not None
