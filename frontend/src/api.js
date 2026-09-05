@@ -19,3 +19,10 @@ export async function fetchHistory(city) {
   }
   return response.json();
 }
+export async function fetchLatest(city) {
+  const response = await fetch(`${API_BASE_URL}/weather/${encodeURIComponent(city)}/latest`);
+  if (!response.ok) {
+    throw new Error(`Request failed with status ${response.status}`);
+  }
+  return response.json();
+}

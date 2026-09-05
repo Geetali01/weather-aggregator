@@ -71,5 +71,4 @@ npm test
 
 ## CI
 
-`.github/workflows/ci.yml` runs the full backend and frontend test suites on
-every push to `main`.
+`.github/workflows/ci.yml` runs the full backend and frontend test suites onevery push to `main`.
