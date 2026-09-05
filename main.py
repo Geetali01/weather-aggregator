@@ -10,20 +10,22 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from adapters.inbound.rest import api as rest_api
+from adapters.outbound.console_notifier import ConsoleNotifier
 from adapters.outbound.in_memory_cache import InMemoryCache
 from adapters.outbound.open_meteo_adapter import OpenMeteoAdapter
 from adapters.outbound.sqlite_repository import SqliteWeatherRepository
 from domain.services import WeatherService
 
 
-def create_app(provider=None, repository=None, cache=None) -> FastAPI:
+def create_app(provider=None, repository=None, cache=None, notifier=None) -> FastAPI:
     """Factory so tests can inject stub/fake adapters instead of real ones."""
     provider = provider or OpenMeteoAdapter()
     db_path = os.environ.get("WEATHER_DB_PATH", "weather.db")
     repository = repository or SqliteWeatherRepository(db_path)
     cache = cache if cache is not None else InMemoryCache()
+    notifier = notifier if notifier is not None else ConsoleNotifier()
 
-    rest_api.weather_service = WeatherService(provider, repository, cache=cache)
+    rest_api.weather_service = WeatherService(provider, repository, cache=cache, notifier=notifier)
 
     app = FastAPI(title="Weather Aggregator")
     app.add_middleware(
