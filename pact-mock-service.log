@@ -1,0 +1,137 @@
+I, [2026-09-05T17:33:45.323687 #10820]  INFO -- : Cleared interactions
+I, [2026-09-05T17:33:45.350145 #10820]  INFO -- : Registered expected interaction GET /v1/forecast?latitude=45.75&longitude=21.23&current_weather=true&wind_speed_unit=kmh
+D, [2026-09-05T17:33:45.350556 #10820] DEBUG -- : {
+  "description": "a request for current weather at those coordinates",
+  "providerState": "coordinates 45.75,21.23 have current weather data",
+  "request": {
+    "method": "GET",
+    "path": "/v1/forecast",
+    "query": {
+      "latitude": [
+        "45.75"
+      ],
+      "longitude": [
+        "21.23"
+      ],
+      "current_weather": [
+        "true"
+      ],
+      "wind_speed_unit": [
+        "kmh"
+      ]
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+    },
+    "body": {
+      "current_weather": {
+        "temperature": 22.4,
+        "windspeed": 14.2,
+        "weathercode": 3,
+        "time": "2024-06-01T14:00"
+      }
+    }
+  },
+  "metadata": null
+}
+I, [2026-09-05T17:33:45.351073 #10820]  INFO -- : Registered expected interaction GET /v1/search?name=Timisoara&count=1&language=en&format=json
+D, [2026-09-05T17:33:45.351329 #10820] DEBUG -- : {
+  "description": "a request to geocode Timisoara",
+  "providerState": "a city named Timisoara exists",
+  "request": {
+    "method": "GET",
+    "path": "/v1/search",
+    "query": {
+      "name": [
+        "Timisoara"
+      ],
+      "count": [
+        "1"
+      ],
+      "language": [
+        "en"
+      ],
+      "format": [
+        "json"
+      ]
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+    },
+    "body": {
+      "results": [
+        {
+          "latitude": 45.75,
+          "longitude": 21.23,
+          "name": "Timisoara",
+          "country": "Romania"
+        }
+      ]
+    }
+  },
+  "metadata": null
+}
+I, [2026-09-05T17:33:45.365462 #10820]  INFO -- : Received request GET /v1/search?name=Timisoara&count=1&language=en&format=json
+D, [2026-09-05T17:33:45.365792 #10820] DEBUG -- : {
+  "path": "/v1/search",
+  "query": "name=Timisoara&count=1&language=en&format=json",
+  "method": "get",
+  "headers": {
+    "Host": "localhost:1234",
+    "User-Agent": "python-requests/2.32.3",
+    "Accept-Encoding": "gzip, deflate",
+    "Accept": "*/*",
+    "Connection": "keep-alive",
+    "Version": "HTTP/1.1"
+  }
+}
+I, [2026-09-05T17:33:45.366505 #10820]  INFO -- : Found matching response for GET /v1/search?name=Timisoara&count=1&language=en&format=json
+D, [2026-09-05T17:33:45.366770 #10820] DEBUG -- : {
+  "status": 200,
+  "headers": {
+  },
+  "body": {
+    "results": [
+      {
+        "latitude": 45.75,
+        "longitude": 21.23,
+        "name": "Timisoara",
+        "country": "Romania"
+      }
+    ]
+  }
+}
+I, [2026-09-05T17:33:45.379032 #10820]  INFO -- : Received request GET /v1/forecast?latitude=45.75&longitude=21.23&current_weather=true&wind_speed_unit=kmh
+D, [2026-09-05T17:33:45.379987 #10820] DEBUG -- : {
+  "path": "/v1/forecast",
+  "query": "latitude=45.75&longitude=21.23&current_weather=true&wind_speed_unit=kmh",
+  "method": "get",
+  "headers": {
+    "Host": "localhost:1234",
+    "User-Agent": "python-requests/2.32.3",
+    "Accept-Encoding": "gzip, deflate",
+    "Accept": "*/*",
+    "Connection": "keep-alive",
+    "Version": "HTTP/1.1"
+  }
+}
+I, [2026-09-05T17:33:45.380465 #10820]  INFO -- : Found matching response for GET /v1/forecast?latitude=45.75&longitude=21.23&current_weather=true&wind_speed_unit=kmh
+D, [2026-09-05T17:33:45.380802 #10820] DEBUG -- : {
+  "status": 200,
+  "headers": {
+  },
+  "body": {
+    "current_weather": {
+      "temperature": 22.4,
+      "windspeed": 14.2,
+      "weathercode": 3,
+      "time": "2024-06-01T14:00"
+    }
+  }
+}
+I, [2026-09-05T17:33:45.396459 #10820]  INFO -- : Verifying - interactions matched
+I, [2026-09-05T17:33:45.415039 #10820]  INFO -- : Writing pact for OpenMeteoAPI to C:/Users/admin/Desktop/weather-aggregator/tests/contract/pacts/weatheraggregatorservice-openmeteoapi.json
