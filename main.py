@@ -7,6 +7,7 @@ from __future__ import annotations
 import os
 
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 
 from adapters.inbound.rest import api as rest_api
 from adapters.outbound.open_meteo_adapter import OpenMeteoAdapter
@@ -23,8 +24,13 @@ def create_app(provider=None, repository=None) -> FastAPI:
     rest_api.weather_service = WeatherService(provider, repository)
 
     app = FastAPI(title="Weather Aggregator")
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=["http://localhost:5173"],
+        allow_methods=["*"],
+        allow_headers=["*"],
+    )
     app.include_router(rest_api.router)
     return app
-
 
 app = create_app()
