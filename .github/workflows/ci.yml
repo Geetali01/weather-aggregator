@@ -34,6 +34,13 @@ jobs:
 
       - name: Run BDD scenarios
         run: behave
+      
+      - name: Smoke test the CLI
+        run: |
+          python cli.py fetch London
+          python cli.py latest London
+        env:
+          WEATHER_DB_PATH: cli-smoke-test.db
 
   frontend-tests:
     runs-on: ubuntu-latest
