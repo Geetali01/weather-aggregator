@@ -22,10 +22,8 @@ def _build_default_repository():
     """Pick the database adapter based on config, with no changes to the domain."""
     postgres_dsn = os.environ.get("WEATHER_POSTGRES_DSN")
     if postgres_dsn:
-        print(f"[config] Using PostgreSQL: {postgres_dsn}")
         return PostgresWeatherRepository(postgres_dsn)
     db_path = os.environ.get("WEATHER_DB_PATH", "weather.db")
-    print(f"[config] Using SQLite: {db_path}")
     return SqliteWeatherRepository(db_path)
 
 
