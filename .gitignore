@@ -6,3 +6,7 @@ node_modules/
 .pytest_cache/
 tests/contract/pacts/
 .env
+pact-mock-service.log
+.pytest_cache/
+*.log
+frontend/dist/
