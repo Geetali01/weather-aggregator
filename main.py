@@ -13,15 +13,26 @@ from adapters.inbound.rest import api as rest_api
 from adapters.outbound.console_notifier import ConsoleNotifier
 from adapters.outbound.in_memory_cache import InMemoryCache
 from adapters.outbound.open_meteo_adapter import OpenMeteoAdapter
+from adapters.outbound.postgres_repository import PostgresWeatherRepository
 from adapters.outbound.sqlite_repository import SqliteWeatherRepository
 from domain.services import WeatherService
+
+
+def _build_default_repository():
+    """Pick the database adapter based on config, with no changes to the domain."""
+    postgres_dsn = os.environ.get("WEATHER_POSTGRES_DSN")
+    if postgres_dsn:
+        print(f"[config] Using PostgreSQL: {postgres_dsn}")
+        return PostgresWeatherRepository(postgres_dsn)
+    db_path = os.environ.get("WEATHER_DB_PATH", "weather.db")
+    print(f"[config] Using SQLite: {db_path}")
+    return SqliteWeatherRepository(db_path)
 
 
 def create_app(provider=None, repository=None, cache=None, notifier=None) -> FastAPI:
     """Factory so tests can inject stub/fake adapters instead of real ones."""
     provider = provider or OpenMeteoAdapter()
-    db_path = os.environ.get("WEATHER_DB_PATH", "weather.db")
-    repository = repository or SqliteWeatherRepository(db_path)
+    repository = repository or _build_default_repository()
     cache = cache if cache is not None else InMemoryCache()
     notifier = notifier if notifier is not None else ConsoleNotifier()
 
@@ -30,7 +41,7 @@ def create_app(provider=None, repository=None, cache=None, notifier=None) -> Fas
     app = FastAPI(title="Weather Aggregator")
     app.add_middleware(
         CORSMiddleware,
-        allow_origins=["http://localhost:5173"],
+        allow_origins=["http://localhost:5173", "http://localhost:5174"],
         allow_methods=["*"],
         allow_headers=["*"],
     )
