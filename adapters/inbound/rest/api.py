@@ -4,6 +4,8 @@ and domain results/errors into HTTP responses.
 """
 from __future__ import annotations
 
+from typing import Any
+
 from fastapi import APIRouter, HTTPException
 
 from domain.exceptions import CityNotFoundError, WeatherProviderError
@@ -16,7 +18,7 @@ router = APIRouter()
 weather_service: WeatherService | None = None
 
 
-def _reading_to_dict(reading: WeatherReading) -> dict:
+def _reading_to_dict(reading: WeatherReading) -> dict[str, Any]:
     return {
         "id": reading.id,
         "city": reading.city,
@@ -29,7 +31,7 @@ def _reading_to_dict(reading: WeatherReading) -> dict:
 
 
 @router.post("/weather/fetch")
-def fetch_weather(city: str):
+def fetch_weather(city: str) -> dict[str, Any]:
     assert weather_service is not None, "weather_service not wired"
     try:
         reading = weather_service.fetch_and_store(city)
@@ -41,14 +43,14 @@ def fetch_weather(city: str):
 
 
 @router.get("/weather/{city}")
-def get_history(city: str):
+def get_history(city: str) -> list[dict[str, Any]]:
     assert weather_service is not None, "weather_service not wired"
     readings = weather_service.get_history(city)
     return [_reading_to_dict(r) for r in readings]
 
 
 @router.get("/weather/{city}/latest")
-def get_latest(city: str):
+def get_latest(city: str) -> dict[str, Any]:
     assert weather_service is not None, "weather_service not wired"
     reading = weather_service.get_latest(city)
     if reading is None:

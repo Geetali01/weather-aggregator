@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import time
 from datetime import datetime, timezone
 
@@ -5,7 +7,7 @@ from adapters.outbound.in_memory_cache import InMemoryCache
 from domain.models import WeatherReading
 
 
-def make_reading(city="Timisoara") -> WeatherReading:
+def make_reading(city: str = "Timisoara") -> WeatherReading:
     return WeatherReading(
         city=city,
         temperature_c=22.4,
@@ -15,7 +17,7 @@ def make_reading(city="Timisoara") -> WeatherReading:
     )
 
 
-def test_set_then_get_returns_the_cached_reading():
+def test_set_then_get_returns_the_cached_reading() -> None:
     cache = InMemoryCache(ttl_seconds=60)
     cache.set("Timisoara", make_reading())
 
@@ -25,12 +27,12 @@ def test_set_then_get_returns_the_cached_reading():
     assert result.city == "Timisoara"
 
 
-def test_get_returns_none_for_a_city_never_cached():
+def test_get_returns_none_for_a_city_never_cached() -> None:
     cache = InMemoryCache(ttl_seconds=60)
     assert cache.get("Nowhere") is None
 
 
-def test_entry_expires_after_the_ttl_elapses():
+def test_entry_expires_after_the_ttl_elapses() -> None:
     cache = InMemoryCache(ttl_seconds=0.05)
     cache.set("Timisoara", make_reading())
 

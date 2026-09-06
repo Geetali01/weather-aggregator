@@ -7,6 +7,7 @@ from __future__ import annotations
 
 import argparse
 import os
+from typing import Any
 
 from adapters.outbound.console_notifier import ConsoleNotifier
 from adapters.outbound.in_memory_cache import InMemoryCache
@@ -25,9 +26,10 @@ def build_service() -> WeatherService:
     return WeatherService(provider, repository, cache=cache, notifier=notifier)
 
 
-def cmd_fetch(service: WeatherService, args) -> None:
+def cmd_fetch(service: WeatherService, args: argparse.Namespace) -> None:
+    city: str = args.city
     try:
-        reading = service.fetch_and_store(args.city)
+        reading = service.fetch_and_store(city)
     except CityNotFoundError as exc:
         print(f"Error: {exc}")
         return
@@ -38,24 +40,26 @@ def cmd_fetch(service: WeatherService, args) -> None:
     print(f"{reading.city}: {reading.temperature_c}°C, {reading.description}")
 
 
-def cmd_history(service: WeatherService, args) -> None:
-    readings = service.get_history(args.city)
+def cmd_history(service: WeatherService, args: argparse.Namespace) -> None:
+    city: str = args.city
+    readings = service.get_history(city)
     if not readings:
-        print(f"No readings stored for '{args.city}'")
+        print(f"No readings stored for '{city}'")
         return
     for reading in readings:
         print(f"{reading.observed_at} — {reading.temperature_c}°C, {reading.description}")
 
 
-def cmd_latest(service: WeatherService, args) -> None:
-    reading = service.get_latest(args.city)
+def cmd_latest(service: WeatherService, args: argparse.Namespace) -> None:
+    city: str = args.city
+    reading = service.get_latest(city)
     if reading is None:
-        print(f"No readings stored for '{args.city}'")
+        print(f"No readings stored for '{city}'")
         return
     print(f"{reading.city}: {reading.temperature_c}°C, {reading.description}")
 
 
-def main():
+def main() -> None:
     parser = argparse.ArgumentParser(description="Weather Aggregator CLI")
     subparsers = parser.add_subparsers(dest="command", required=True)
 
@@ -73,7 +77,8 @@ def main():
 
     args = parser.parse_args()
     service = build_service()
-    args.func(service, args)
+    func: Any = args.func
+    func(service, args)
 
 
 if __name__ == "__main__":

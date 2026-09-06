@@ -1,6 +1,9 @@
+from __future__ import annotations
+
 import os
 import uuid
 from datetime import datetime, timezone
+from pathlib import Path
 
 import pytest
 
@@ -9,7 +12,7 @@ from domain.models import WeatherReading
 
 
 @pytest.fixture
-def repository(tmp_path):
+def repository(tmp_path: Path):
     db_path = tmp_path / f"test-{uuid.uuid4().hex}.db"
     repo = SqliteWeatherRepository(str(db_path))
     yield repo
@@ -18,7 +21,7 @@ def repository(tmp_path):
         os.remove(db_path)
 
 
-def make_reading(city="Timisoara", temp=22.4, when=None) -> WeatherReading:
+def make_reading(city: str = "Timisoara", temp: float = 22.4, when: datetime | None = None) -> WeatherReading:
     return WeatherReading(
         city=city,
         temperature_c=temp,
@@ -28,13 +31,13 @@ def make_reading(city="Timisoara", temp=22.4, when=None) -> WeatherReading:
     )
 
 
-def test_save_assigns_an_id(repository):
+def test_save_assigns_an_id(repository: SqliteWeatherRepository) -> None:
     saved = repository.save(make_reading())
     assert saved.id is not None
     assert saved.city == "Timisoara"
 
 
-def test_find_by_city_returns_most_recent_first(repository):
+def test_find_by_city_returns_most_recent_first(repository: SqliteWeatherRepository) -> None:
     repository.save(make_reading(temp=10.0, when=datetime(2024, 6, 1, 8, 0, tzinfo=timezone.utc)))
     repository.save(make_reading(temp=22.4, when=datetime(2024, 6, 1, 14, 0, tzinfo=timezone.utc)))
     repository.save(make_reading(city="Cluj", temp=5.0))
@@ -44,12 +47,15 @@ def test_find_by_city_returns_most_recent_first(repository):
     assert [r.temperature_c for r in results] == [22.4, 10.0]
 
 
-def test_find_latest_by_city_returns_the_newest_reading(repository):
+def test_find_latest_by_city_returns_the_newest_reading(repository: SqliteWeatherRepository) -> None:
     repository.save(make_reading(temp=10.0, when=datetime(2024, 6, 1, 8, 0, tzinfo=timezone.utc)))
     repository.save(make_reading(temp=22.4, when=datetime(2024, 6, 1, 14, 0, tzinfo=timezone.utc)))
 
-    assert repository.find_latest_by_city("Timisoara").temperature_c == 22.4
+    latest = repository.find_latest_by_city("Timisoara")
+
+    assert latest is not None
+    assert latest.temperature_c == 22.4
 
 
-def test_find_latest_returns_none_when_nothing_stored(repository):
+def test_find_latest_returns_none_when_nothing_stored(repository: SqliteWeatherRepository) -> None:
     assert repository.find_latest_by_city("Nowhere") is None

@@ -5,8 +5,6 @@ the rest of the app, doesn't need to know or care which one is plugged in.
 """
 from __future__ import annotations
 
-from datetime import datetime
-
 import psycopg2
 import psycopg2.extras
 
@@ -26,7 +24,7 @@ CREATE TABLE IF NOT EXISTS weather_readings (
 """
 
 
-def _row_to_reading(row) -> WeatherReading:
+def _row_to_reading(row: psycopg2.extras.RealDictRow) -> WeatherReading:
     return WeatherReading(
         id=row["id"],
         city=row["city"],
@@ -64,6 +62,7 @@ class PostgresWeatherRepository(WeatherRepositoryPort):
                 ),
             )
             row = cursor.fetchone()
+            assert row is not None
             return _row_to_reading(row)
 
     def find_by_city(self, city: str) -> list[WeatherReading]:

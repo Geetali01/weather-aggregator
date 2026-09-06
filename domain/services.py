@@ -5,7 +5,7 @@ or DB imports here — this is what unit tests exercise with mocks/stubs.
 from __future__ import annotations
 
 from domain.models import WeatherReading
-from domain.ports import WeatherCachePort, WeatherProviderPort, WeatherRepositoryPort
+from domain.ports import NotifierPort, WeatherCachePort, WeatherProviderPort, WeatherRepositoryPort
 
 
 class WeatherService:
@@ -14,7 +14,7 @@ class WeatherService:
         provider: WeatherProviderPort,
         repository: WeatherRepositoryPort,
         cache: WeatherCachePort | None = None,
-        notifier=None,
+        notifier: NotifierPort | None = None,
     ):
         self._provider = provider
         self._repository = repository

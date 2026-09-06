@@ -4,10 +4,13 @@ PostgreSQL database. Requires a running Postgres instance and the
 WEATHER_TEST_POSTGRES_DSN environment variable to be set; skipped otherwise
 so the rest of the suite doesn't require a database to run.
 """
+from __future__ import annotations
+
 import os
 import uuid
 from datetime import datetime, timezone
 
+import psycopg2
 import pytest
 
 from adapters.outbound.postgres_repository import PostgresWeatherRepository
@@ -22,14 +25,17 @@ pytestmark = pytest.mark.skipif(
 
 @pytest.fixture
 def repository():
+    assert DSN is not None
     repo = PostgresWeatherRepository(DSN)
     yield repo
-    with repo._conn.cursor() as cursor:
-        cursor.execute("DELETE FROM weather_readings")
+    with psycopg2.connect(DSN) as cleanup_conn:
+        with cleanup_conn.cursor() as cursor:
+            cursor.execute("DELETE FROM weather_readings")
+        cleanup_conn.commit()
     repo.close()
 
 
-def make_reading(city="Timisoara", temp=22.4, when=None) -> WeatherReading:
+def make_reading(city: str = "Timisoara", temp: float = 22.4, when: datetime | None = None) -> WeatherReading:
     return WeatherReading(
         city=city,
         temperature_c=temp,
@@ -39,13 +45,13 @@ def make_reading(city="Timisoara", temp=22.4, when=None) -> WeatherReading:
     )
 
 
-def test_save_assigns_an_id(repository):
+def test_save_assigns_an_id(repository: PostgresWeatherRepository) -> None:
     saved = repository.save(make_reading())
     assert saved.id is not None
     assert saved.city == "Timisoara"
 
 
-def test_find_by_city_returns_most_recent_first(repository):
+def test_find_by_city_returns_most_recent_first(repository: PostgresWeatherRepository) -> None:
     repository.save(make_reading(temp=10.0, when=datetime(2024, 6, 1, 8, 0, tzinfo=timezone.utc)))
     repository.save(make_reading(temp=22.4, when=datetime(2024, 6, 1, 14, 0, tzinfo=timezone.utc)))
     repository.save(make_reading(city=f"Cluj-{uuid.uuid4().hex}", temp=5.0))
@@ -55,12 +61,15 @@ def test_find_by_city_returns_most_recent_first(repository):
     assert [r.temperature_c for r in results] == [22.4, 10.0]
 
 
-def test_find_latest_by_city_returns_the_newest_reading(repository):
+def test_find_latest_by_city_returns_the_newest_reading(repository: PostgresWeatherRepository) -> None:
     repository.save(make_reading(temp=10.0, when=datetime(2024, 6, 1, 8, 0, tzinfo=timezone.utc)))
     repository.save(make_reading(temp=22.4, when=datetime(2024, 6, 1, 14, 0, tzinfo=timezone.utc)))
 
-    assert repository.find_latest_by_city("Timisoara").temperature_c == 22.4
+    latest = repository.find_latest_by_city("Timisoara")
+
+    assert latest is not None
+    assert latest.temperature_c == 22.4
 
 
-def test_find_latest_returns_none_when_nothing_stored(repository):
+def test_find_latest_returns_none_when_nothing_stored(repository: PostgresWeatherRepository) -> None:
     assert repository.find_latest_by_city(f"Nowhere-{uuid.uuid4().hex}") is None

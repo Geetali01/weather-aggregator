@@ -1,10 +1,14 @@
+from __future__ import annotations
+
 from datetime import datetime, timezone
+
+import pytest
 
 from adapters.outbound.console_notifier import ConsoleNotifier
 from domain.models import WeatherReading
 
 
-def make_reading(city="Timisoara") -> WeatherReading:
+def make_reading(city: str = "Timisoara") -> WeatherReading:
     return WeatherReading(
         city=city,
         temperature_c=22.4,
@@ -14,7 +18,7 @@ def make_reading(city="Timisoara") -> WeatherReading:
     )
 
 
-def test_notify_prints_the_city_and_temperature(capsys):
+def test_notify_prints_the_city_and_temperature(capsys: pytest.CaptureFixture[str]) -> None:
     notifier = ConsoleNotifier()
 
     notifier.notify(make_reading())

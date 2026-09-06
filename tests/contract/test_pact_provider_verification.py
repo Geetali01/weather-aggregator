@@ -1,15 +1,20 @@
+# pyright: reportUnknownVariableType=false, reportUnknownMemberType=false
 """
 Provider verification: replay the generated Pact file against a stub
 server that mimics what we expect Open-Meteo to return, proving our
 consumer's expectations are satisfiable.
 """
+from __future__ import annotations
+
 import json
 import os
 import threading
+from collections.abc import Iterator
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from urllib.parse import urlparse, parse_qs
 
 import pytest
+import requests
 
 PACT_FILE = os.path.join(os.path.dirname(__file__), "pacts", "weatheraggregatorservice-openmeteoapi.json")
 
@@ -17,7 +22,7 @@ PACT_FILE = os.path.join(os.path.dirname(__file__), "pacts", "weatheraggregators
 class StubOpenMeteoHandler(BaseHTTPRequestHandler):
     """Minimal stub that replays canned responses matching our Pact interactions."""
 
-    def do_GET(self):
+    def do_GET(self) -> None:
         parsed = urlparse(self.path)
         query = parse_qs(parsed.query)
 
@@ -47,12 +52,12 @@ class StubOpenMeteoHandler(BaseHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(payload)
 
-    def log_message(self, format, *args):
+    def log_message(self, format: str, *args: object) -> None:
         pass  # silence default request logging
 
 
 @pytest.fixture
-def stub_server():
+def stub_server() -> Iterator[HTTPServer]:
     server = HTTPServer(("localhost", 0), StubOpenMeteoHandler)
     thread = threading.Thread(target=server.serve_forever, daemon=True)
     thread.start()
@@ -60,14 +65,12 @@ def stub_server():
     server.shutdown()
 
 
-def test_stub_satisfies_every_interaction_in_the_pact(stub_server):
+def test_stub_satisfies_every_interaction_in_the_pact(stub_server: HTTPServer) -> None:
     with open(PACT_FILE) as f:
         pact_data = json.load(f)
 
     port = stub_server.server_address[1]
     base_url = f"http://localhost:{port}"
-
-    import requests
 
     for interaction in pact_data["interactions"]:
         request_spec = interaction["request"]

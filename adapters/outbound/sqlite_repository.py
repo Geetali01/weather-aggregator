@@ -59,6 +59,7 @@ class SqliteWeatherRepository(WeatherRepositoryPort):
             ),
         )
         self._conn.commit()
+        assert cursor.lastrowid is not None
         return reading.with_id(cursor.lastrowid)
 
     def find_by_city(self, city: str) -> list[WeatherReading]:

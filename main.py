@@ -15,10 +15,11 @@ from adapters.outbound.in_memory_cache import InMemoryCache
 from adapters.outbound.open_meteo_adapter import OpenMeteoAdapter
 from adapters.outbound.postgres_repository import PostgresWeatherRepository
 from adapters.outbound.sqlite_repository import SqliteWeatherRepository
+from domain.ports import NotifierPort, WeatherCachePort, WeatherProviderPort, WeatherRepositoryPort
 from domain.services import WeatherService
 
 
-def _build_default_repository():
+def _build_default_repository() -> WeatherRepositoryPort:
     """Pick the database adapter based on config, with no changes to the domain."""
     postgres_dsn = os.environ.get("WEATHER_POSTGRES_DSN")
     if postgres_dsn:
@@ -27,7 +28,12 @@ def _build_default_repository():
     return SqliteWeatherRepository(db_path)
 
 
-def create_app(provider=None, repository=None, cache=None, notifier=None) -> FastAPI:
+def create_app(
+    provider: WeatherProviderPort | None = None,
+    repository: WeatherRepositoryPort | None = None,
+    cache: WeatherCachePort | None = None,
+    notifier: NotifierPort | None = None,
+) -> FastAPI:
     """Factory so tests can inject stub/fake adapters instead of real ones."""
     provider = provider or OpenMeteoAdapter()
     repository = repository or _build_default_repository()

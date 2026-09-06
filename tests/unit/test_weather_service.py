@@ -1,10 +1,12 @@
+from __future__ import annotations
+
 from datetime import datetime, timezone
 
 import pytest
 
 from domain.exceptions import CityNotFoundError, WeatherProviderError
 from domain.models import WeatherReading
-from domain.ports import WeatherProviderPort, WeatherRepositoryPort
+from domain.ports import NotifierPort, WeatherCachePort, WeatherProviderPort, WeatherRepositoryPort
 from domain.services import WeatherService
 
 
@@ -14,7 +16,7 @@ class FakeProvider(WeatherProviderPort):
     def __init__(self, reading: WeatherReading | None = None, error: Exception | None = None):
         self._reading = reading
         self._error = error
-        self.requested_city = None
+        self.requested_city: str | None = None
 
     def get_current_weather(self, city: str) -> WeatherReading:
         self.requested_city = city
@@ -28,7 +30,7 @@ class FakeRepository(WeatherRepositoryPort):
     """Test double standing in for the real database adapter."""
 
     def __init__(self):
-        self._store = []
+        self._store: list[WeatherReading] = []
         self._next_id = 1
 
     def save(self, reading: WeatherReading) -> WeatherReading:
@@ -41,35 +43,35 @@ class FakeRepository(WeatherRepositoryPort):
         matches = [r for r in self._store if r.city == city]
         return sorted(matches, key=lambda r: r.observed_at, reverse=True)
 
-    def find_latest_by_city(self, city: str):
+    def find_latest_by_city(self, city: str) -> WeatherReading | None:
         matches = self.find_by_city(city)
         return matches[0] if matches else None
 
 
-class FakeCache:
+class FakeCache(WeatherCachePort):
     """Test double standing in for a real cache adapter."""
 
     def __init__(self):
-        self._store = {}
+        self._store: dict[str, WeatherReading] = {}
 
-    def get(self, city):
+    def get(self, city: str) -> WeatherReading | None:
         return self._store.get(city)
 
-    def set(self, city, reading):
+    def set(self, city: str, reading: WeatherReading) -> None:
         self._store[city] = reading
 
 
-class FakeNotifier:
+class FakeNotifier(NotifierPort):
     """Test double standing in for a real notification adapter."""
 
     def __init__(self):
-        self.notified_readings = []
+        self.notified_readings: list[WeatherReading] = []
 
-    def notify(self, reading):
+    def notify(self, reading: WeatherReading) -> None:
         self.notified_readings.append(reading)
 
 
-def make_reading(city="Timisoara") -> WeatherReading:
+def make_reading(city: str = "Timisoara") -> WeatherReading:
     return WeatherReading(
         city=city,
         temperature_c=22.4,
@@ -79,7 +81,7 @@ def make_reading(city="Timisoara") -> WeatherReading:
     )
 
 
-def test_successful_fetch_and_store_returns_saved_reading_with_id():
+def test_successful_fetch_and_store_returns_saved_reading_with_id() -> None:
     provider = FakeProvider(reading=make_reading())
     repository = FakeRepository()
     service = WeatherService(provider, repository)
@@ -91,7 +93,7 @@ def test_successful_fetch_and_store_returns_saved_reading_with_id():
     assert result.city == "Timisoara"
 
 
-def test_external_api_failure_propagates_and_stores_nothing():
+def test_external_api_failure_propagates_and_stores_nothing() -> None:
     provider = FakeProvider(error=WeatherProviderError("Open-Meteo is down"))
     repository = FakeRepository()
     service = WeatherService(provider, repository)
@@ -102,7 +104,7 @@ def test_external_api_failure_propagates_and_stores_nothing():
     assert repository.find_by_city("Timisoara") == []
 
 
-def test_city_not_found_propagates_and_stores_nothing():
+def test_city_not_found_propagates_and_stores_nothing() -> None:
     provider = FakeProvider(error=CityNotFoundError("Atlantis"))
     repository = FakeRepository()
     service = WeatherService(provider, repository)
@@ -114,7 +116,7 @@ def test_city_not_found_propagates_and_stores_nothing():
 
 
 class TestCaching:
-    def test_cache_hit_skips_the_provider_and_returns_cached_reading(self):
+    def test_cache_hit_skips_the_provider_and_returns_cached_reading(self) -> None:
         provider = FakeProvider(reading=make_reading())
         repository = FakeRepository()
         cache = FakeCache()
@@ -126,7 +128,7 @@ class TestCaching:
         assert provider.requested_city is None
         assert result.city == "Timisoara"
 
-    def test_cache_miss_calls_the_provider_and_populates_the_cache(self):
+    def test_cache_miss_calls_the_provider_and_populates_the_cache(self) -> None:
         provider = FakeProvider(reading=make_reading())
         repository = FakeRepository()
         cache = FakeCache()
@@ -139,25 +141,25 @@ class TestCaching:
 
 
 class TestNotifications:
-    def test_successful_fetch_triggers_a_notification(self):
+    def test_successful_fetch_triggers_a_notification(self) -> None:
         provider = FakeProvider(reading=make_reading())
         repository = FakeRepository()
         notifier = FakeNotifier()
         service = WeatherService(provider, repository, notifier=notifier)
 
-        result = service.fetch_and_store("Timisoara")
+        service.fetch_and_store("Timisoara")
 
         assert len(notifier.notified_readings) == 1
         assert notifier.notified_readings[0].city == "Timisoara"
 
-    def test_no_notification_sent_when_no_notifier_configured(self):
+    def test_no_notification_sent_when_no_notifier_configured(self) -> None:
         provider = FakeProvider(reading=make_reading())
         repository = FakeRepository()
         service = WeatherService(provider, repository)
 
         service.fetch_and_store("Timisoara")
 
-    def test_failed_fetch_does_not_trigger_a_notification(self):
+    def test_failed_fetch_does_not_trigger_a_notification(self) -> None:
         provider = FakeProvider(error=CityNotFoundError("Atlantis"))
         repository = FakeRepository()
         notifier = FakeNotifier()
